@@ -11,35 +11,26 @@ from timeit import default_timer as timer
 import random
 
 
-# def hash(self, block):
-#     string_object = json.dumps(block, sort_keys=True)
-#     block_string = string_object.encode()
-#     raw_hash = hashlib.sha256(block_string)
-#     hex_hash = raw_hash.hexdigest()
-#     return hex_hash
-
-
 def proof_of_work(last_proof):
-    # Multi-Ouroboros of Work Algorithm
-    # - Find a number p' such that the last six digits of hash(p) are equal
-    # to the first six digits of hash(p')
-    # - IE:  last_hash: ...AE9123456, new hash 123456888...
-    # - p is the previous proof, and p' is the new proof
-    # - Use the same method to generate SHA-256 hashes as the examples in class
     start = timer()
+    timeout = random.randrange(10, 16)
     # rcv and sort
-    # last_proof_string = json.dumps(last_proof, sort_keys=True)
+    # last_last_proof = json.dumps(last_proof, sort_keys=True)
+
+    print(f" \n> Searching for next proof. Timeout in {timeout}s")
+    # Start the search here
+
     cash = {}
 
-    print("Searching for next proof")
-    # Start the search here
-    proof = 1076306
-
+    proof = random.randrange(1, 99999)
+    print('proof in POW: ', proof)
 
     while valid_proof(last_proof, proof) is False:
-        proof += random.randrange(1, 3)
+        proof += random.randrange(1, 10)
+        if timer() - start > 12:
+            proof = 0
+            break
 
-    # proof found
     print("Proof found: " + str(proof) + " in " + str(timer() - start))
     return proof
 
@@ -64,9 +55,9 @@ def valid_proof(last_proof, proof):
 if __name__ == '__main__':
     # What node are we interacting with?
     if len(sys.argv) > 1:
-        node = sys.argv[1]
+        node2 = sys.argv[1]
     else:
-        node = "https://lambda-coin.herokuapp.com/api"
+        node2 = "https://lambda-coin-test-1.herokuapp.com/api"
 
     coins_mined = 0
 
@@ -83,28 +74,38 @@ if __name__ == '__main__':
     # Run forever until interrupted
     while True:
         # Get the last proof from the server
-        r = requests.get(url=node + "/last_proof")
+        # r = requests.get(url=node + "/last_proof")
+        r2 = requests.get(url=node2 + "/last_proof")
         try:
-            data = r.json()
+            data = r2.json()
+            print('Last proof ', data)
         except:
-            print("Server down, try again please", r)
-            r = None
+            print("Server down, try again please", r2)
+            r2 = None
 
-        if r is not None:
-            data = r.json()
-
-            print('  ', r, data)
+        while r2 is not None:
+            data = r2.json()
+            print(' ', r2)
 
             new_proof = proof_of_work(data.get('proof'))
 
             post_data = {"proof": new_proof,
                         "id": id}
 
-            r = requests.post(url=node + "/mine", json=post_data)
-            data = r.json()
+            print('post_data: ', post_data)
+            if post_data["proof"] is 0:
+                print("XXX took too long XXX try again")
+                break
 
-            if data.get('message') == 'New Block Forged':
-                coins_mined += 1
-                print("Total coins mined: " + str(coins_mined))
+            attempt_mine_response = requests.post(url=node2 + "/mine", json=post_data)
+            print(" ", attempt_mine_response, 'attempt_mine_response ')
+
+            if attempt_mine_response is not None:
+                response = attempt_mine_response.json()
+                if response.get('message') == 'New Block Forged':
+                    coins_mined += 1
+                    print("Total coins mined: " + str(coins_mined))
+                else:
+                    print(response.get('message'))
             else:
-                print(data.get('message'))
+                print("failed")
