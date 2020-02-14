@@ -13,7 +13,7 @@ import random
 
 def proof_of_work(last_proof):
     start = timer()
-    timeout = random.randrange(10, 16)
+    timeout = random.randrange(4, 10)
     # rcv and sort
     # last_last_proof = json.dumps(last_proof, sort_keys=True)
 
@@ -22,7 +22,7 @@ def proof_of_work(last_proof):
 
     cash = {}
 
-    proof = random.randrange(1, 99999)
+    proof = random.randrange(1, 99999) + random.random()
     print('proof in POW: ', proof)
 
     while valid_proof(last_proof, proof) is False:
@@ -94,7 +94,7 @@ if __name__ == '__main__':
 
             print('post_data: ', post_data)
             if post_data["proof"] is 0:
-                print("XXX took too long XXX try again")
+                print("> XXX took too long XXX try again \n")
                 break
 
             attempt_mine_response = requests.post(url=node2 + "/mine", json=post_data)
