@@ -24,11 +24,25 @@ This sprint challenge is divided up into three parts:  Hash tables coding, block
 
 Explain in detail the workings of a dynamic array:
 * What is the runtime complexity to access an array, add or remove from the front, and add or remove from the back?
-* What is the worse case scenario if you try to extend the storage size of a dynamic array?
+
+- > Is it an unsorted or sorted array? \
+If sorted, that changes things. Now the item needs to be added to a specific index or the array needs to be sorted again after adding the item. So in sorted, it depends how we sort the array. \
+Insert in an unsorted array is sometimes quoted as being O(n) due to the assumption that the element to be inserted must be inserted at one particular location of the array, which would require shifting all the subsequent elements by one position. \
+However, in a classic array, the array is used to store arbitrary unsorted elements, and hence the exact position of any given element is of no consequence, and insert is carried out by increasing the array size by 1 and storing the element at the end of the array, which is a O(1) operation. \
+Inserting specifically at the beginning of the array, however, would be an O(n) operation. \
+For removing from an unsorted array, O(1) from the end, O(n) from the front.
+
+* What is the worst case scenario if you try to extend the storage size of a dynamic array?
+
+- > Usually, adding a new element at the end of the dynamic array takes O(1) time. But if the dynamic array doesn't have any room for the new item, it'll need to expand, which takes O(n) time.
 
 Explain how a blockchain is structured. What are the blocks, what is the chain? How is the data organized?
+
+> A blockchain consist of blocks. Blocks contain hashes of the previous block. The chain is the ledger of each block which each are connected to the previous block through their hashes. Each block consists of the proof, previous hash, and un hashed list of transactions which serve as a record of transaction history. Blockchains are like linked lists except that the pointer that connects the links (blocks) are hashes that are evaluated when adding to the ll, making for a linked list that cannot receive new links anywhere other than the head. So a ridgid, one way, immutable linked list.
  
 Explain how proof of work functions. How does it operate. How does this protect the chain from attack. What kind of attack is possible?
+
+> 51% attack. If enough nodes were compromised, a nefarious actor could change any transaction and the cooresponding blocks. POW takes the last block, hashes it, takes a proof and compares it to some restriction until it finds the correct proof.
 
 ## Project Set Up
 

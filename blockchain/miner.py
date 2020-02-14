@@ -1,5 +1,6 @@
 import hashlib
 import requests
+import json
 
 import sys
 
@@ -8,6 +9,14 @@ from uuid import uuid4
 from timeit import default_timer as timer
 
 import random
+
+
+# def hash(self, block):
+#     string_object = json.dumps(block, sort_keys=True)
+#     block_string = string_object.encode()
+#     raw_hash = hashlib.sha256(block_string)
+#     hex_hash = raw_hash.hexdigest()
+#     return hex_hash
 
 
 def proof_of_work(last_proof):
@@ -19,28 +28,39 @@ def proof_of_work(last_proof):
     - p is the previous proof, and p' is the new proof
     - Use the same method to generate SHA-256 hashes as the examples in class
     """
-
     start = timer()
+    # rcv and sort
+    last_proof_string = json.dumps(last_proof, sort_keys=True)
 
     print("Searching for next proof")
-    proof = 0
-    #  TODO: Your code here
+    # Start the search here
+    proof = 1076306
 
+    cash = {}
+
+    while valid_proof(last_proof_string, proof) is False:
+        proof += 1
+
+    # proof found
     print("Proof found: " + str(proof) + " in " + str(timer() - start))
     return proof
 
 
-def valid_proof(last_hash, proof):
-    """
-    Validates the Proof:  Multi-ouroborus:  Do the last six characters of
-    the hash of the last proof match the first six characters of the hash
-    of the new proof?
+def valid_proof(last_proof, proof):
+    # Validates the Proof:  Multi-ouroborus:
+    #
+    # Do the last six characters of the hash of the last proof 
+    # match the first six characters of the hash of the new proof?
+    #
+    # IE:  last_hash: ...AE9123456, new hash 123456E88...
+    # proof_string = str(proof)
+    guess_last = f'{last_proof}'.encode()
+    guess_last_proof = hashlib.sha256(guess_last).hexdigest()
 
-    IE:  last_hash: ...AE9123456, new hash 123456E88...
-    """
+    guess = f'{proof}'.encode()
+    guess_proof = hashlib.sha256(guess).hexdigest()
 
-    # TODO: Your code here!
-    pass
+    return guess_last_proof[-6:] == guess_proof[0:6]
 
 
 if __name__ == '__main__':
@@ -66,11 +86,11 @@ if __name__ == '__main__':
         # Get the last proof from the server
         r = requests.get(url=node + "/last_proof")
         data = r.json()
+        print('data - last proof from the server: ', data)
         new_proof = proof_of_work(data.get('proof'))
 
         post_data = {"proof": new_proof,
                      "id": id}
-
         r = requests.post(url=node + "/mine", json=post_data)
         data = r.json()
         if data.get('message') == 'New Block Forged':
