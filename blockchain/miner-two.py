@@ -13,7 +13,7 @@ import random
 
 def proof_of_work(last_proof):
     start = timer()
-    timeout = random.randrange(4, 10)
+    timeout = random.randrange(3, 6)
     # rcv and sort
     # last_last_proof = json.dumps(last_proof, sort_keys=True)
 
